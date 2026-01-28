@@ -20,11 +20,24 @@ namespace GameProgramming2_Challegne3Interfaces_GabeRyan
             {
 
                 Draw();
-                ConsoleKeyInfo input = Console.ReadKey();
-                if(input == ConsoleKey.M)
+                ConsoleKeyInfo input = Console.ReadKey(true);
+                if(input.Key == ConsoleKey.M)
                 {
-
+                    enemy.Move();
                 }
+                if(input.Key == ConsoleKey.I)
+                {
+                    enemy._movementType = Enemy.MovementType.agressive;
+                }
+                if (input.Key == ConsoleKey.O)
+                {
+                    enemy._movementType = Enemy.MovementType.passive;
+                }
+                if (input.Key == ConsoleKey.P)
+                {
+                    enemy._movementType = Enemy.MovementType.random;
+                }
+                Console.Clear();
 
 
 
@@ -78,14 +91,14 @@ namespace GameProgramming2_Challegne3Interfaces_GabeRyan
                 _enemyPosition = new Position(enemyPosX, enemyPosY);
                 _enemyColour = enemyColour;
             }
-            enum MovementType
+            public enum MovementType
             {
                 agressive,
                 passive,
                 random
 
             };
-            MovementType _movementType;
+            public MovementType _movementType;
 
             public void Move()
             {
