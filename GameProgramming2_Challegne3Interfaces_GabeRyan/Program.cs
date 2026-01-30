@@ -9,47 +9,137 @@ namespace GameProgramming2_Challegne3Interfaces_GabeRyan
 {
     internal class Program
     {
-    
+        
         public static bool _isPlaying = true;
         static Player player = new Player(playerPosX: 5, playerPosY: 5, ConsoleColor.Blue);
         static Enemy enemy = new Enemy(enemyPosX: 20, enemyPosY: 20, ConsoleColor.Red);
+
+        
+
         static void Main(string[] args)
         {
+            AgressiveMoveStrategy agressiveStrategy = new AgressiveMoveStrategy();
+            PassiveMoveStrategy passiveMoveStrategy = new PassiveMoveStrategy();
+            RandomMoveStrategy randomMoveStrategy = new RandomMoveStrategy();
+
+            enemy._moveStrategy = agressiveStrategy;
             
-            while(_isPlaying == true)
+
+
+            while (_isPlaying == true)
             {
 
                 Draw();
                 ConsoleKeyInfo input = Console.ReadKey(true);
-                if(input.Key == ConsoleKey.M)
+                if (input.Key == ConsoleKey.M)
                 {
                     enemy.Move();
                 }
-                if(input.Key == ConsoleKey.I)
+                if (input.Key == ConsoleKey.I)
                 {
-                    enemy._movementType = Enemy.MovementType.agressive;
+                    enemy._moveStrategy = agressiveStrategy;
                 }
                 if (input.Key == ConsoleKey.O)
                 {
-                    enemy._movementType = Enemy.MovementType.passive;
+                    enemy._moveStrategy = passiveMoveStrategy;
                 }
                 if (input.Key == ConsoleKey.P)
                 {
-                    enemy._movementType = Enemy.MovementType.random;
+                    enemy._moveStrategy = randomMoveStrategy;
                 }
                 Console.Clear();
-
-
-
-
             }
-           
-            
+
+
 
 
         }
 
+        public interface IMoveStrategy
+        {
+            Position Move(Position position);
+            
+        }
+       
 
+
+        class AgressiveMoveStrategy : IMoveStrategy
+        {
+            public Position Move(Position position)
+            {
+                int currentX = position._x;
+                int currentY = position._y;
+
+               
+
+                if (currentX < player._playerPosition._x)
+                {
+                    currentX += 1;
+                }
+                if (currentX > player._playerPosition._x)
+                {
+                    currentX -= 1;
+                }
+                if (currentY < player._playerPosition._y)
+                {
+                    currentY += 1;
+                }
+                if (currentY > player._playerPosition._y)
+                {
+                    currentY -= 1;
+                }
+
+                return new Position(currentX, currentY);
+
+            }
+            
+        }
+
+        class PassiveMoveStrategy : IMoveStrategy 
+        {
+            public Position Move(Position position)
+            {
+                int currentX = position._x;
+                int currentY = position._y;
+
+                if (currentX > player._playerPosition._x)
+                {
+                    currentX += 1;
+                }
+                if (currentX < player._playerPosition._x)
+                {
+                    currentX -= 1;
+                }
+                if (currentY > player._playerPosition._y)
+                {
+                    currentY += 1;
+                }
+                if (currentY < player._playerPosition._y)
+                {
+                    currentY -= 1;
+                }
+                return new Position(currentX, currentY);
+
+            }
+        }
+
+        class RandomMoveStrategy : IMoveStrategy
+        {
+            public Position Move(Position position)
+            {
+                int currentX = position._x;
+                int currentY = position._y;
+                Random random = new Random();
+
+                int randomX = random.Next(-1, 2);
+                int randomY = random.Next(-1, 2);
+
+                currentX += randomX;
+                currentY += randomY;
+
+                return new Position(currentX, currentY);
+            }
+        }
 
         public struct Position
         {
@@ -66,7 +156,7 @@ namespace GameProgramming2_Challegne3Interfaces_GabeRyan
         public class Player
         {
 
-            ConsoleColor _playerColour;
+            public ConsoleColor _playerColour;
             public Position _playerPosition;
 
             
@@ -82,8 +172,10 @@ namespace GameProgramming2_Challegne3Interfaces_GabeRyan
 
         public class Enemy
         {
+            public IMoveStrategy _moveStrategy;
+
             
-            ConsoleColor _enemyColour;
+            public ConsoleColor _enemyColour;
             public Position _enemyPosition;
 
             public Enemy(int enemyPosX, int enemyPosY, ConsoleColor enemyColour)
@@ -91,78 +183,25 @@ namespace GameProgramming2_Challegne3Interfaces_GabeRyan
                 _enemyPosition = new Position(enemyPosX, enemyPosY);
                 _enemyColour = enemyColour;
             }
-            public enum MovementType
-            {
-                agressive,
-                passive,
-                random
-
-            };
-            public MovementType _movementType;
 
             public void Move()
             {
-                if(_movementType == MovementType.agressive)
-                {
-                    if(_enemyPosition._x < player._playerPosition._x)
-                    {
-                        _enemyPosition._x += 1;
-                    }
-                    if (_enemyPosition._x > player._playerPosition._x)
-                    {
-                        _enemyPosition._x -= 1;
-                    }
-                    if (_enemyPosition._y < player._playerPosition._y)
-                    {
-                        _enemyPosition._y += 1;
-                    }
-                    if (_enemyPosition._y > player._playerPosition._y)
-                    {
-                        _enemyPosition._y -= 1;
-                    }
-                }
-                if(_movementType == MovementType.passive)
-                {
-                    if (_enemyPosition._x > player._playerPosition._x)
-                    {
-                        _enemyPosition._x += 1;
-                    }
-                    if (_enemyPosition._x < player._playerPosition._x)
-                    {
-                        _enemyPosition._x -= 1;
-                    }
-                    if (_enemyPosition._y > player._playerPosition._y)
-                    {
-                        _enemyPosition._y += 1;
-                    }
-                    if (_enemyPosition._y < player._playerPosition._y)
-                    {
-                        _enemyPosition._y -= 1;
-                    }
-                }
-                if(_movementType == MovementType.random)
-                {
-                    Random random = new Random();
-
-                    int randomX = random.Next(-1, 2);
-                    int randomY = random.Next(-1, 2);
-
-                    _enemyPosition._x += randomX;
-                    _enemyPosition._y += randomY;
-                }
-                
-                
+                _enemyPosition = _moveStrategy.Move(_enemyPosition);
+               
             }
-
-
+            
         }
 
         public static void Draw()
         {
             Console.SetCursorPosition(player._playerPosition._x, player._playerPosition._y);
+            Console.ForegroundColor = player._playerColour;
             Console.Write("O");
+            Console.ResetColor();
             Console.SetCursorPosition(enemy._enemyPosition._x, enemy._enemyPosition._y);
+            Console.ForegroundColor = enemy._enemyColour;
             Console.Write("X");
+            Console.ResetColor();
         }
     }
 }
